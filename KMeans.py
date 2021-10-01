@@ -2,6 +2,9 @@ import numpy as np
 from numpy.core.fromnumeric import mean
 from numpy.lib.function_base import average
 import math
+from random import randint
+
+from numpy.lib.index_tricks import c_
 
 
 class KMeans():
@@ -24,21 +27,38 @@ class KMeans():
         """
         # YOUR CODE HERE
         self.init_centroids(self.n_clusters, input)
+        # print("Original cluster is")
+        # old_centroids = np.array(self.cluster_centers_)
+        # print(old_centroids)
+        # print("_____________")
+        # self.recenter_centroids(input)
+        # print("After recenter:")
+        # new_centroids = self.cluster_centers_
+        # print(new_centroids)
+        # difference = np.subtract(old_centroids, new_centroids)
 
         condition = True
-        while condition:
-            print("Original cluster is")
+        iter_count = 0
+        while condition or iter_count < self.max_iter:
+            # print("Original cluster is")
             old_centroids = np.array(self.cluster_centers_)
-            print(old_centroids)
-            print("_____________")
+            # print(old_centroids)
+            # print("_____________")
             self.recenter_centroids(input)
-            print("After recenter:")
+            # print("After recenter:")
             new_centroids = self.cluster_centers_
-            difference = np.subtract(old_centroids, new_centroids)
-            if (np.all(difference) <= 0.001):
+            difference = np.abs(np.subtract(new_centroids, old_centroids))
+            # print("Difference is ")
+            # print(difference)
+            # print(new_centroids)
+            iter_count += 1
+            if (np.any(difference) > 0.0001):
+                continue
+            else:
                 break
             # condition = np.all(difference > 0.0001)
         
+        # print(self.labels_)
         return self.cluster_centers_
     
     
@@ -54,9 +74,12 @@ class KMeans():
                 M = number of features
         """
         # YOUR CODE HERE 
-        self.cluster_centers_ = np.array([])
-        for i in range(num_features):
-            self.cluster_centers_ = np.append(self.cluster_centers_, input[i])
+        pos = randint(1, len(input)-1)
+        self.cluster_centers_ = np.array([input[pos]])
+        for i in range(1, num_features):
+            pos = randint(1, len(input)-1)
+            x = np.array([input[pos]])
+            self.cluster_centers_ = np.append(self.cluster_centers_, x,axis=0)
 
 
     def calculate_distance(self, d_features, c_features) -> int:
@@ -66,7 +89,11 @@ class KMeans():
         """
         # YOUR CODE HERE
         distance_squared = 0 
-        distance_squared += (d_features - c_features)**2 
+        for i in range(len(d_features)):
+            distance_squared += abs(d_features[i] - c_features[i])
+        
+        distance_squared = distance_squared**2
+
         return math.sqrt(distance_squared)
 
     def recenter_centroids(self, input: np.array) -> None:
@@ -80,10 +107,13 @@ class KMeans():
         for data in input:
             distanceArray = []
             for i in range(len(self.cluster_centers_)):
-                distanceArray.append(self.calculate_distance(data,self.cluster_centers_[i]))
+                distanceArray.append(self.calculate_distance(data, self.cluster_centers_[i]))
             c = np.argmin(distanceArray)
             c_array.append(c)
         
+        self.labels_= np.array(c_array)
+        # print(c_array)
+
         for i in range(len(self.cluster_centers_)):
             sumDistance = 0
             count = 0
@@ -91,6 +121,8 @@ class KMeans():
                 if c_array[j] == i:
                     sumDistance += input[j]
                     count += 1
+            # print("COUNT IS ")
+            # print(count)
             self.cluster_centers_[i] = sumDistance/count
 
 

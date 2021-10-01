@@ -1,4 +1,8 @@
 import numpy as np
+from numpy.core.fromnumeric import mean
+from numpy.lib.function_base import average
+import math
+
 
 class KMeans():
     
@@ -19,11 +23,26 @@ class KMeans():
             This function will simply return the cluster centers, but it will also update your cluster centers and predictions.
         """
         # YOUR CODE HERE
+        self.init_centroids(self.n_clusters, input)
 
+        condition = True
+        while condition:
+            print("Original cluster is")
+            old_centroids = np.array(self.cluster_centers_)
+            print(old_centroids)
+            print("_____________")
+            self.recenter_centroids(input)
+            print("After recenter:")
+            new_centroids = self.cluster_centers_
+            difference = np.subtract(old_centroids, new_centroids)
+            if (np.all(difference) <= 0.001):
+                break
+            # condition = np.all(difference > 0.0001)
+        
         return self.cluster_centers_
     
     
-    def init_centroids(self, num_features: int) -> np.array:
+    def init_centroids(self, num_features: int, input) -> np.array:
         """
             To initialize the classifier, you will create random starting points for your centroids. 
             You will have n_cluster (N) amounts of centroids and the dimension of your centroids depends on the shape of your data.
@@ -35,17 +54,20 @@ class KMeans():
                 M = number of features
         """
         # YOUR CODE HERE 
+        self.cluster_centers_ = np.array([])
+        for i in range(num_features):
+            self.cluster_centers_ = np.append(self.cluster_centers_, input[i])
 
-        return None
 
     def calculate_distance(self, d_features, c_features) -> int:
         """
             Calculates the Euclidean distance between point A and point B. 
             Recall that a Euclidean distance can be expanded such that D^2 = A^2 + B^2 + ... Z^2. 
         """
-        # YOUR CODE HERE 
-
-        return 0
+        # YOUR CODE HERE
+        distance_squared = 0 
+        distance_squared += (d_features - c_features)**2 
+        return math.sqrt(distance_squared)
 
     def recenter_centroids(self, input: np.array) -> None:
         """
@@ -54,5 +76,25 @@ class KMeans():
         """
 
         # YOUR CODE HERE 
+        c_array = []
+        for data in input:
+            distanceArray = []
+            for i in range(len(self.cluster_centers_)):
+                distanceArray.append(self.calculate_distance(data,self.cluster_centers_[i]))
+            c = np.argmin(distanceArray)
+            c_array.append(c)
+        
+        for i in range(len(self.cluster_centers_)):
+            sumDistance = 0
+            count = 0
+            for j in range(len(c_array)):
+                if c_array[j] == i:
+                    sumDistance += input[j]
+                    count += 1
+            self.cluster_centers_[i] = sumDistance/count
+
+
+ 
+                    
 
         

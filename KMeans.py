@@ -25,40 +25,27 @@ class KMeans():
                 If you can explain the difference between the fit function of this unsupervised algorithm and any other supervised algorith, you get 5 extra credit points towards this assignment. 
             This function will simply return the cluster centers, but it will also update your cluster centers and predictions.
         """
-        # YOUR CODE HERE
+        # Initialize centroids
         self.init_centroids(self.n_clusters, input)
-        # print("Original cluster is")
-        # old_centroids = np.array(self.cluster_centers_)
-        # print(old_centroids)
-        # print("_____________")
-        # self.recenter_centroids(input)
-        # print("After recenter:")
-        # new_centroids = self.cluster_centers_
-        # print(new_centroids)
-        # difference = np.subtract(old_centroids, new_centroids)
 
-        condition = True
+        # Number of loop count
         iter_count = 0
-        while condition or iter_count < self.max_iter:
-            # print("Original cluster is")
+        
+        # Continue looping as long as loop count is len than max
+        # or change between old and new centroid > 0.0001
+        while True or iter_count < self.max_iter:
             old_centroids = np.array(self.cluster_centers_)
-            # print(old_centroids)
-            # print("_____________")
             self.recenter_centroids(input)
-            # print("After recenter:")
             new_centroids = self.cluster_centers_
             difference = np.abs(np.subtract(new_centroids, old_centroids))
-            # print("Difference is ")
-            # print(difference)
-            # print(new_centroids)
             iter_count += 1
+
+            # Check if the change is smaller or larger than 0.0001
             if (np.any(difference) > 0.0001):
                 continue
             else:
                 break
-            # condition = np.all(difference > 0.0001)
-        
-        # print(self.labels_)
+
         return self.cluster_centers_
     
     
@@ -73,9 +60,11 @@ class KMeans():
                 N = n_clusters 
                 M = number of features
         """
-        # YOUR CODE HERE 
+        # Get a random position, and assign a cluster there.
         pos = randint(1, len(input)-1)
         self.cluster_centers_ = np.array([input[pos]])
+
+        # Continute to get random position and assign as cluster.
         for i in range(1, num_features):
             pos = randint(1, len(input)-1)
             x = np.array([input[pos]])
@@ -87,12 +76,11 @@ class KMeans():
             Calculates the Euclidean distance between point A and point B. 
             Recall that a Euclidean distance can be expanded such that D^2 = A^2 + B^2 + ... Z^2. 
         """
-        # YOUR CODE HERE
         distance_squared = 0 
+
         for i in range(len(d_features)):
-            distance_squared += abs(d_features[i] - c_features[i])
-        
-        distance_squared = distance_squared**2
+            distance_squared += abs(d_features[i] - c_features[i])**2
+
 
         return math.sqrt(distance_squared)
 
@@ -101,19 +89,24 @@ class KMeans():
             This function recenters the centroid to the average distance of all its datapoints.
             Returns nothing, but updates cluster centers 
         """
-
-        # YOUR CODE HERE 
+        # array to store c index.
         c_array = []
+
+        # for each data point in input
+        # calculate the distance from data point to each of the centroid
+        # pick out the smallest distance and get the centroid's index
         for data in input:
-            distanceArray = []
+            distance_array = []
             for i in range(len(self.cluster_centers_)):
-                distanceArray.append(self.calculate_distance(data, self.cluster_centers_[i]))
-            c = np.argmin(distanceArray)
+                distance_array.append(self.calculate_distance(data, self.cluster_centers_[i]))
+            c = np.argmin(distance_array)
             c_array.append(c)
         
+        # assign labels as c_array 
         self.labels_= np.array(c_array)
-        # print(c_array)
 
+        # then, for each cluster
+        # cluster = mean of distance to each data point.
         for i in range(len(self.cluster_centers_)):
             sumDistance = 0
             count = 0
@@ -121,8 +114,6 @@ class KMeans():
                 if c_array[j] == i:
                     sumDistance += input[j]
                     count += 1
-            # print("COUNT IS ")
-            # print(count)
             self.cluster_centers_[i] = sumDistance/count
 
 
